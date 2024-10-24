@@ -1,5 +1,8 @@
 <script setup>
 import { reactive } from "vue"
+import HeaderTask from "./components/HeaderTask.vue"
+import FormTask from "./components/FormTask.vue"
+import TaskList from "./components/TaskList.vue"
 
 const state = reactive({
 	filter: "todas",
@@ -47,6 +50,14 @@ const getFilteredTask = () => {
 	}
 }
 
+function handleFilter(event) {
+	state.filter = event.target.value
+}
+
+function handleTaskTitle(event) {
+	state.tempTask = event.target.value
+}
+
 const handleAddTask = () => {
 	const newTask = {
 		id: state.tasks.length + 1,
@@ -60,66 +71,14 @@ const handleAddTask = () => {
 
 <template>
 	<div class="container">
-		<header class="p-5 mb-4 mt-4 bg-light rounded-3">
-			<h1>Minhas Tarefas</h1>
-			<p>Você possui {{ getIncompleteTask().length }} tarefas pendentes</p>
-		</header>
-
-		<form @submit.prevent="handleAddTask">
-			<div class="row">
-				<div class="col">
-					<input
-						@change="event => (state.tempTask = event.target.value)"
-						required
-						class="form-control"
-						type="text"
-						placeholder="Digite aqui sua tarefa"
-						:value="state.tempTask" />
-				</div>
-				<div class="col-md-2">
-					<button
-						type="submit"
-						class="btn btn-primary w-100">
-						Cadastrar
-					</button>
-				</div>
-				<div class="col-md-2">
-					<select
-						@change="event => (state.filter = event.target.value)"
-						name=""
-						id=""
-						class="form-control">
-						<option value="todas">Todas as tarefas</option>
-						<option value="pendentes">Pendentes</option>
-						<option value="finalizadas">Finalizadas</option>
-					</select>
-				</div>
-			</div>
-		</form>
-		<ul class="list-group mt-4">
-			<li
-				class="list-group-item"
-				v-for="task in getFilteredTask()"
-				:key="task.id">
-				<input
-					@change="event => (task.completed = event.target.checked)"
-					:checked="task.completed"
-					:id="`task-${task.id}`"
-					type="checkbox"
-					name="" />
-				<label
-					:class="{ done: task.completed }"
-					class="ms-3"
-					:for="`task-${task.id}`"
-					>{{ task.title }}</label
-				>
-			</li>
-		</ul>
+		<HeaderTask
+			:pendingTasks="getIncompleteTask().length"
+			:allTasks="state.tasks.length" />
+		<FormTask
+			:handleAddTask="handleAddTask"
+			:tempTask="state.tempTask"
+			:handleChangingFilter="handleFilter"
+			:handleTaskTitle="handleTaskTitle" />
+		<TaskList :filteredTasks="getFilteredTask()" />
 	</div>
 </template>
-
-<style scoped>
-.done {
-	text-decoration: line-through;
-}
-</style>
